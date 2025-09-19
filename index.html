@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gemini Chatbot</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #chat { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; margin-bottom: 10px; }
+    .user { color: blue; margin: 5px 0; }
+    .bot { color: green; margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>Gemini Chatbot</h1>
+  <div id="chat"></div>
+  <input id="userInput" type="text" placeholder="Type your message here..." autocomplete="off" />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value.trim();
+      if (!message) return;
+
+      const chat = document.getElementById("chat");
+      chat.innerHTML += `<div class="user"><strong>You:</strong> ${message}</div>`;
+      input.value = "";
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await res.json();
+        if (data.reply) {
+          chat.innerHTML += `<div class="bot"><strong>Bot:</strong> ${data.reply}</div>`;
+        } else {
+          chat.innerHTML += `<div class="bot"><strong>Error:</strong> ${data.error}</div>`;
+        }
+      } catch (error) {
+        chat.innerHTML += `<div class="bot"><strong>Error:</strong> ${error.message}</div>`;
+      }
+
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>
